@@ -1,0 +1,7 @@
+Makefile
+.vscode/
+objects/
+*.exe
+*.dmp
+*.log
+Doxyfile
