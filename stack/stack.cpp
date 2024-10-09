@@ -89,7 +89,7 @@ void push(stack_t *stack, stack_unit_t to_push)
 {
     DUMP(stack);
     verify(stack, __func__);
-    if (stack->errors & HASH_ERROR or stack->errors & CNR_ERROR or stack->errors & EMPTY_SIZE)
+    if (stack->errors & HASH_ERROR or stack->errors & CNR_ERROR or stack->errors & EMPTY_SIZE or stack->errors == NO_ERROR)
     {
         stack->errors = NO_ERROR;
         if ( stack->size >= stack->capacity )
@@ -102,7 +102,7 @@ stack_unit_t pop(stack_t *stack)
 {
     DUMP(stack);
     verify(stack, __func__);
-    if (stack->errors & HASH_ERROR or stack->errors & CNR_ERROR)
+    if (stack->errors & HASH_ERROR or stack->errors & CNR_ERROR or stack->errors == NO_ERROR)
     {
         if (stack->size == 0)
         {
@@ -110,11 +110,10 @@ stack_unit_t pop(stack_t *stack)
             return 0;
         } else
         {
+            //printf("1 %lf %d \n", stack->data[stack->size - 1], stack->size);
             return stack->data[--stack->size];
         }
-        stack_balancer(stack);
     }
-    DUMP(stack);
     return 0;
 }
 
@@ -132,7 +131,7 @@ size_t dump(stack_t *stack, FILE *fp, const char *file, const char *func, int li
     }
     if (fp == NULL)
     {
-        int correctness = file_open(&fp, "logger.log"); // check, cringeeeeee
+        int correctness = file_open(&fp, "logger.log", "a+"); // check, cringeeeeee
         if (correctness)
         {
             fp = stdin;
@@ -191,7 +190,7 @@ size_t verify(stack_t *stack, const char *func)
             stack->errors = stack->errors | EMPTY_CAPACITY;
         } else if (stack->size > stack->capacity)
         {
-            stack->errors = stack->errors | OVERFLOW;
+            stack->errors = stack->errors | OVERFLOWS;
         }
         if (strcmp(func, "get_hash") and strcmp(func, "set_hash"))
         {
@@ -205,7 +204,7 @@ void error_logger(size_t error, FILE *fp)
 {
     if (fp == NULL)
     {
-        int correctness = file_open(&fp, "logger.log"); // check, cringeeeeee
+        int correctness = file_open(&fp, "logger.log", "a+"); // check, cringeeeeee
         if (correctness)
         {
             fp = stdin;
@@ -217,7 +216,7 @@ void error_logger(size_t error, FILE *fp)
         fprintf(fp, "No errors\n");
     if (error & NULL_DATA)
         fprintf(fp, "WARNING: Data pointer is NULL\n");
-    if (error & OVERFLOW)
+    if (error & OVERFLOWS)
         fprintf(fp, "ERROR: Your stack size is bigger, than capacity\n");
     if (error & NO_STACK)
         fprintf(fp, "ERROR: No stack\n");
@@ -233,12 +232,109 @@ void error_logger(size_t error, FILE *fp)
         fprintf(fp, "WARNING: Canary was changed\n");
 }
 
-int file_open(FILE **fp, const char *file_name)
+void run(char *file_name)
+{
+    stack_t stack = {};
+
+    init(&stack, 100);
+
+    FILE *fp = NULL;
+    int correctness = file_open(&fp, file_name, "r");
+    if (!correctness)
+    {
+        bool run = true;
+        char command[MAX_STRING_SIZE] = "";
+        stack_unit_t to_push = 0;
+        while(run)
+        {
+            fscanf(fp, "%s", command);
+            if (!strcmp(command, "push"))
+            {
+                fscanf(fp, "%lf", &to_push);
+                //printf("%lf", to_push);
+                push(&stack, to_push);
+                to_push = 0;
+                continue;
+            }
+            if (!strcmp(command, "sub"))
+            {
+                stack_unit_t a = pop(&stack);
+                stack_unit_t b = pop(&stack);
+                push(&stack, b - a);
+                //printf("%lf %lf ", b, a);
+                continue;
+            }
+            if (!strcmp(command, "div"))
+            {
+                stack_unit_t a = pop(&stack);
+                stack_unit_t b = pop(&stack);
+                push(&stack, b / a);
+                continue;
+            }
+            if (!strcmp(command, "pls"))
+            {
+                stack_unit_t a = pop(&stack);
+                stack_unit_t b = pop(&stack);
+                //printf("%lf %lf ", a, b);
+                push(&stack, b + a);
+                continue;
+            }
+            if (!strcmp(command, "mul"))
+            {
+                stack_unit_t a = pop(&stack);
+                stack_unit_t b = pop(&stack);
+                push(&stack, b * a);
+                continue;
+            }
+            if (!strcmp(command, "sin"))
+            {
+                stack_unit_t a = pop(&stack);
+                push(&stack, sin(a));
+                continue;
+            }
+            if (!strcmp(command, "cos"))
+            {
+                stack_unit_t a = pop(&stack);
+                push(&stack, cos(a));
+                continue;
+            }
+            if (!strcmp(command, "sqrt"))
+            {
+                stack_unit_t a = pop(&stack);
+                push(&stack, sqrt(a));
+                continue;
+            }
+            if (!strcmp(command, "exp"))
+            {
+                stack_unit_t a = pop(&stack);
+                push(&stack, exp(a));
+                continue;
+            }
+            if (!strcmp(command, "out"))
+            {
+                stack_unit_t a = pop(&stack);
+                printf("%lf", a);
+            }
+            if (!strcmp(command, "hlt"))
+            {
+                run = false;
+                continue;
+            }
+            if (!strcmp(command, "dump"))
+            {
+                DUMP(&stack);
+                continue;
+            }
+        }
+    }
+}
+
+int file_open(FILE **fp, const char *file_name, const char *type)
 {
     if (fp == NULL or file_name == NULL)
         return 1;
 
-    if ((*fp = fopen(file_name, "a+")) == NULL)
+    if ((*fp = fopen(file_name, type)) == NULL)
     {
         perror("File open error");
     }

@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <string.h>
+#include <math.h>
 
 #define DUMP(stack) dump(stack, NULL, __FILE__, __func__, __LINE__);
 
@@ -14,7 +15,7 @@ typedef enum
 {
     NO_ERROR = 0,
     NULL_DATA = 1,
-    OVERFLOW = 1 << 1,
+    OVERFLOWS = 1 << 1,
     NO_STACK = 1 << 2,
     DESTROYED = 1 << 3,
     EMPTY_CAPACITY = 1 << 4,
@@ -27,6 +28,7 @@ typedef double stack_unit_t;
 const size_t DEFAULT = 0xAAAAAAAAAAAAAAAA;
 const size_t MOD = 1e9 + 7;
 const size_t SIMPLE = 101;
+const size_t MAX_STRING_SIZE = 50;
 
 struct stack_t
 {
@@ -97,11 +99,16 @@ void error_logger(size_t error, FILE *fp);
 /*
 открывает файл
 */
-int file_open(FILE **fp, const char *file_name);
+int file_open(FILE **fp, const char *file_name, const char *type);
 
 /*
 Закрывает файл
 */
 int file_close(FILE **fp);
+
+/*
+Запускает работу над стеком из файла
+*/
+void run(char *file_name);
 
 #endif
