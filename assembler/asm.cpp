@@ -12,7 +12,7 @@ void code_to_stack(code_t *code, const char *output_file)
     int correctness = file_open(&fp, output_file, "r+");
     if (!correctness)
     {
-        for(size_t i = 0; i < code->pointer - 1; i++)
+        for(size_t i = 0; i < code->pointer; i++)
         {
             fprintf(fp, "%lf ", code->data[i]);
         }
