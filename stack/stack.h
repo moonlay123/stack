@@ -9,7 +9,7 @@
 #include <string.h>
 #include <math.h>
 
-#define DUMP(stack) dump(stack, NULL, __FILE__, __func__, __LINE__);
+#define DUMP(stack) //dump(stack, NULL, __FILE__, __func__, __LINE__);
 
 typedef enum
 {
@@ -23,7 +23,7 @@ typedef enum
     HASH_ERROR = 1 << 6,
     CNR_ERROR = 1 << 7
 } err_t;
-typedef double stack_unit_t;
+typedef int stack_unit_t;
 
 const size_t DEFAULT = 0xAAAAAAAAAAAAAAAA;
 const size_t MOD = 1e9 + 7;

@@ -1,9 +1,21 @@
-push 30
-push 70
-pls
-push 80
-push 60
-sub
-div
+push 0
+pop ax
+A:
+push ax
+push ax
+mul
 out
+push ax
+push 1
+add
+pop ax
+push ax
+push 10
+jb B
+hlt
+
+B:
+push 3
+push 3
+je A
 hlt
